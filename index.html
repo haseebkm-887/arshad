@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BrainSpark — Quick Quiz</title>
+  <link rel="stylesheet" href="/theme.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen overflow-x-hidden">
+  <div class="pointer-events-none fixed -left-32 -top-32 h-96 w-96 rounded-full bg-[var(--color-primary)] opacity-10 blur-3xl"></div>
+  <div class="pointer-events-none fixed -bottom-48 -right-32 h-96 w-96 rounded-full bg-fuchsia-500 opacity-10 blur-3xl"></div>
+
+  <main class="relative mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-6 sm:px-8 sm:py-8">
+    <header class="flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3" aria-label="BrainSpark home">
+        <span class="grid h-10 w-10 place-items-center rounded-[var(--radius)] bg-[var(--color-primary)] text-xl shadow-lg shadow-purple-500/20">✦</span>
+        <span class="font-heading text-xl font-bold tracking-tight">Brain<span class="text-[var(--color-primary)]">Spark</span></span>
+      </a>
+      <div class="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-[var(--color-muted)]">
+        <span class="text-amber-300">●</span>
+        <span>Knowledge mode</span>
+      </div>
+    </header>
+
+    <section id="quiz-screen" class="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center py-12">
+      <div class="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <p class="mb-2 text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-primary)]">Quick-fire quiz</p>
+          <h1 class="font-heading text-3xl font-bold leading-tight sm:text-5xl">Give your brain<br class="sm:hidden"> a little <span class="text-[var(--color-primary)]">spark.</span></h1>
+        </div>
+        <div class="text-right">
+          <p class="text-xs uppercase tracking-widest text-[var(--color-muted)]">Score</p>
+          <p id="score-display" class="font-heading text-2xl font-bold">0</p>
+        </div>
+      </div>
+
+      <div class="mb-8 h-2 overflow-hidden rounded-full bg-white/10" aria-label="Quiz progress">
+        <div id="progress-bar" class="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500" style="width: 12.5%"></div>
+      </div>
+
+      <article class="glow rounded-[var(--radius)] border border-white/10 bg-[var(--color-surface)] p-5 sm:p-9">
+        <div class="mb-8 flex items-center justify-between">
+          <span id="question-count" class="rounded-full bg-white/5 px-3 py-1 text-sm font-semibold text-[var(--color-muted)]">Question 01 / 08</span>
+          <span id="category-label" class="text-sm text-[var(--color-muted)]">General knowledge</span>
+        </div>
+        <div id="question-content" class="fade-in">
+          <h2 id="question-text" class="font-heading text-2xl font-bold leading-snug sm:text-3xl">Loading question...</h2>
+          <div id="answers" class="mt-7 grid gap-3"></div>
+        </div>
+        <div id="feedback" class="mt-6 hidden items-center justify-between gap-4 rounded-[var(--radius)] border px-4 py-3 text-sm" role="status">
+          <span id="feedback-text" class="font-semibold"></span>
+          <button id="next-button" class="shrink-0 rounded-xl bg-[var(--color-primary)] px-4 py-2 font-semibold text-[var(--color-primary-contrast)] transition hover:brightness-110">Next question →</button>
+        </div>
+      </article>
+      <p class="mt-5 text-center text-sm text-[var(--color-muted)]">Choose the best answer. No pressure — just curiosity.</p>
+    </section>
+
+    <section id="results-screen" class="mx-auto hidden w-full max-w-2xl flex-1 items-center justify-center py-12">
+      <div class="fade-in glow w-full rounded-[var(--radius)] border border-white/10 bg-[var(--color-surface)] p-7 text-center sm:p-12">
+        <div class="mx-auto mb-6 grid h-20 w-20 place-items-center rounded-full bg-[var(--color-primary)]/15 text-4xl">🏆</div>
+        <p class="mb-3 text-sm font-semibold uppercase tracking-[0.22em] text-[var(--color-primary)]">Quiz complete</p>
+        <h1 id="result-title" class="font-heading text-4xl font-bold sm:text-5xl">Brilliant work!</h1>
+        <p id="result-message" class="mx-auto mt-4 max-w-md text-[var(--color-muted)]">You made it through all eight questions.</p>
+        <div class="my-8 rounded-[var(--radius)] border border-white/10 bg-white/[0.04] py-6">
+          <p class="text-sm uppercase tracking-widest text-[var(--color-muted)]">Your final score</p>
+          <p class="mt-1 font-heading text-6xl font-bold text-[var(--color-primary)]"><span id="final-score">0</span><span class="text-3xl text-[var(--color-muted)]"> / 8</span></p>
+        </div>
+        <button id="play-again" class="w-full rounded-[var(--radius)] bg-[var(--color-primary)] px-6 py-4 font-semibold text-[var(--color-primary-contrast)] shadow-lg shadow-purple-500/20 transition hover:-translate-y-0.5 hover:brightness-110">Play again</button>
+      </div>
+    </section>
+
+    <footer class="pt-8 text-center text-xs text-[var(--color-muted)]">Made for curious minds · BrainSpark</footer>
+  </main>
+
+  <script>
+    const questions = [{
+        text: "Which planet is known as the Red Planet?",
+        answers: ["Venus", "Mars", "Jupiter", "Mercury"],
+        correct: 1
+      },
+      {
+        text: "What is the largest ocean on Earth?",
+        answers: ["Atlantic Ocean", "Indian Ocean", "Pacific Ocean", "Arctic Ocean"],
+        correct: 2
+      },
+      {
+        text: "Who painted the Mona Lisa?",
+        answers: ["Vincent van Gogh", "Pablo Picasso", "Claude Monet", "Leonardo da Vinci"],
+        correct: 3
+      },
+      {
+        text: "What is the chemical symbol for gold?",
+        answers: ["Go", "Gd", "Au", "Ag"],
+        correct: 2
+      },
+      {
+        text: "How many sides does a heptagon have?",
+        answers: ["Five", "Six", "Seven", "Eight"],
+        correct: 2
+      },
+      {
+        text: "Which instrument has 88 keys?",
+        answers: ["Violin", "Piano", "Flute", "Trumpet"],
+        correct: 1
+      },
+      {
+        text: "What is the fastest land animal?",
+        answers: ["Cheetah", "Lion", "Greyhound", "Pronghorn"],
+        correct: 0
+      },
+      {
+        text: "In which country would you find the ancient city of Petra?",
+        answers: ["Egypt", "Jordan", "Greece", "Turkey"],
+        correct: 1
+      }
+    ];
+
+    let current = 0;
+    let score = 0;
+    let answered = false;
+    const quizScreen = document.getElementById("quiz-screen");
+    const resultsScreen = document.getElementById("results-screen");
+    const questionText = document.getElementById("question-text");
+    const questionContent = document.getElementById("question-content");
+    const answers = document.getElementById("answers");
+    const feedback = document.getElementById("feedback");
+    const feedbackText = document.getElementById("feedback-text");
+    const nextButton = document.getElementById("next-button");
+    const scoreDisplay = document.getElementById("score-display");
+    const questionCount = document.getElementById("question-count");
+    const progressBar = document.getElementById("progress-bar");
+
+    function renderQuestion() {
+      const question = questions[current];
+      answered = false;
+      questionCount.textContent = `Question ${String(current + 1).padStart(2, "0")} / ${questions.length}`;
+      progressBar.style.width = `${((current + 1) / questions.length) * 100}%`;
+      questionText.textContent = question.text;
+      answers.innerHTML = "";
+      feedback.classList.add("hidden");
+      feedback.classList.remove("flex");
+      questionContent.classList.remove("fade-in");
+      void questionContent.offsetWidth;
+      questionContent.classList.add("fade-in");
+
+      question.answers.forEach((answer, index) => {
+        const button = document.createElement("button");
+        button.className = "answer-button flex w-full items-center gap-4 rounded-[var(--radius)] border border-white/10 bg-white/[0.03] p-4 text-left text-base font-medium";
+        button.innerHTML = `<span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white/10 text-sm text-[var(--color-muted)]">${String.fromCharCode(65 + index)}</span><span>${answer}</span>`;
+        button.addEventListener("click", () => chooseAnswer(index));
+        answers.appendChild(button);
+      });
+    }
+
+    function chooseAnswer(selected) {
+      if (answered) return;
+      answered = true;
+      const question = questions[current];
+      const buttons = [...answers.querySelectorAll("button")];
+      buttons.forEach((button, index) => {
+        button.disabled = true;
+        if (index === question.correct) button.classList.add("correct");
+        else if (index === selected) button.classList.add("incorrect");
+        else button.classList.add("muted-answer");
+      });
+      const isCorrect = selected === question.correct;
+      if (isCorrect) {
+        score++;
+        scoreDisplay.textContent = score;
+        feedbackText.textContent = "Correct! Your brain is sparking. ✨";
+        feedback.className = "mt-6 flex items-center justify-between gap-4 rounded-[var(--radius)] border border-emerald-400/30 bg-emerald-400/10 px-4 py-3 text-sm text-emerald-200";
+      } else {
+        feedbackText.textContent = `Not quite — the answer is ${question.answers[question.correct]}.`;
+        feedback.className = "mt-6 flex items-center justify-between gap-4 rounded-[var(--radius)] border border-rose-400/30 bg-rose-400/10 px-4 py-3 text-sm text-rose-200";
+      }
+      nextButton.textContent = current === questions.length - 1 ? "See results →" : "Next question →";
+    }
+
+    function showResults() {
+      quizScreen.classList.add("hidden");
+      resultsScreen.classList.remove("hidden");
+      resultsScreen.classList.add("flex");
+      document.getElementById("final-score").textContent = score;
+      const title = document.getElementById("result-title");
+      const message = document.getElementById("result-message");
+      if (score === questions.length) {
+        title.textContent = "Perfect spark!";
+        message.textContent = "Every answer landed. That was seriously impressive.";
+      } else if (score >= 5) {
+        title.textContent = "Brilliant work!";
+        message.textContent = "A strong showing — your curiosity is paying off.";
+      } else {
+        title.textContent = "Nice first round!";
+        message.textContent = "Every question is a chance to learn something new.";
+      }
+    }
+
+    nextButton.addEventListener("click", () => {
+      if (current === questions.length - 1) showResults();
+      else {
+        current++;
+        renderQuestion();
+      }
+    });
+
+    document.getElementById("play-again").addEventListener("click", () => {
+      current = 0;
+      score = 0;
+      scoreDisplay.textContent = "0";
+      resultsScreen.classList.add("hidden");
+      resultsScreen.classList.remove("flex");
+      quizScreen.classList.remove("hidden");
+      renderQuestion();
+    });
+
+    renderQuestion();
+
+  </script>
+</body>
+
+</html>
